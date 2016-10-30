@@ -1,0 +1,12 @@
+django==1.8.4
+django-bootstrap3==5.4.0
+django-pipeline==1.5.1
+django-static-precompiler==0.9
+django-adminplus==0.3
+djangorestframework==3.3.1
+
+requests==2.7.0
+python-dateutil==2.2
+cryptography==1.5.2
+pycrypto==2.6.1
+

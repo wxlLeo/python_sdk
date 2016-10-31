@@ -17,6 +17,7 @@ ENV = ENV_DEV
 
 SECRET_KEY = 'fanlitou'
 
+
 STATIC_URL = '/static/'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',

@@ -35,30 +35,17 @@ class Register(APIView, ApiBase):
         uid = parse_post_request_para(request, "uid")
         sign = parse_post_request_para(request, "sign")
 
-        validate_phone_num_result = register.validate_request_data(phone_num)
-        if not validate_phone_num_result["success"]:
-            result = validate_phone_num_result["data"]
+        is_success, result = register.validate_request_datas(phone_num, time_stamp, uid)
+
+        if not is_success:
             logger.info("Auto register api return result is: %s" % result)
             return ApiResponse(data=result)
 
-        validate_time_stamp_result = register.validate_request_data(time_stamp)
-        if not validate_time_stamp_result["success"]:
-            result = validate_time_stamp_result["data"]
+        is_success, result = register.validate_sign(sign, phone_num, fcode, time_stamp, serial_num)
+
+        if not is_success:
             logger.info("Auto register api return result is: %s" % result)
             return ApiResponse(data=result)
-
-        validate_uid_result = register.validate_request_data(uid)
-        if not validate_uid_result["success"]:
-            result = validate_uid_result["data"]
-            logger.info("Auto register api return result is: %s" % result)
-            return ApiResponse(data=result)
-
-        validate_sign_result = register.validate_sign(sign, phone_num, fcode, time_stamp, serial_num)
-
-        if not validate_sign_result["success"]:
-            result = validate_sign_result["data"]
-            logger.info("Auto register api return result is: %s" % result)
-            return ApiResponse(data=validate_sign_result["data"])
 
         phone_num = register.decrypt_data(phone_num)
         uid = register.decrypt_data(uid)
@@ -89,24 +76,17 @@ class RegisterQuery(APIView, ApiBase):
         serial_num = parse_post_request_para(request, "serial_num")
         sign = parse_post_request_para(request, "sign")
 
-        validate_phone_num_result = register.validate_request_data(phone_num)
-        if not validate_phone_num_result["success"]:
-            result = validate_phone_num_result["data"]
-            logger.info("Register query api return result is: %s" % result)
+        is_success, result = register.validate_request_datas(phone_num, time_stamp)
+
+        if not is_success:
+            logger.info("Auto register api return result is: %s" % result)
             return ApiResponse(data=result)
 
-        validate_time_stamp_result = register.validate_request_data(time_stamp)
-        if not validate_time_stamp_result["success"]:
-            result = validate_time_stamp_result["data"]
-            logger.info("Register query api return result is: %s" % result)
+        is_success, result = register.validate_sign(sign, phone_num, fcode, time_stamp, serial_num)
+
+        if not is_success:
+            logger.info("Auto register api return result is: %s" % result)
             return ApiResponse(data=result)
-
-        validate_sign_result = register.validate_sign(sign, phone_num, fcode, time_stamp, serial_num)
-
-        if not validate_sign_result["success"]:
-            result = validate_sign_result["data"]
-            logger.info("Register query api return result is: %s" % result)
-            return ApiResponse(data=validate_sign_result["data"])
 
         phone_num = register.decrypt_data(phone_num)
 
@@ -137,38 +117,20 @@ class LoginToken(APIView, ApiBase):
         register_token = parse_post_request_para(request, "register_token")
         sign = parse_post_request_para(request, "sign")
 
-        validate_phone_num_result = register.validate_request_data(phone_num)
-        if not validate_phone_num_result["success"]:
-            result = validate_phone_num_result["data"]
-            logger.info("Login token api return result is: %s" % result)
+        is_success, result = register.validate_request_datas(phone_num, uid, time_stamp, register_token)
+
+        if not is_success:
+            logger.info("Auto register api return result is: %s" % result)
             return ApiResponse(data=result)
 
-        validate_uid_result = register.validate_request_data(uid)
-        if not validate_uid_result["success"]:
-            result = validate_uid_result["data"]
-            logger.info("Login token api return result is: %s" % result)
+        is_success, result = register.validate_sign(sign, phone_num, fcode, time_stamp, "")
+
+        if not is_success:
+            logger.info("Auto register api return result is: %s" % result)
             return ApiResponse(data=result)
-
-        validate_time_stamp_result = register.validate_request_data(time_stamp)
-        if not validate_time_stamp_result["success"]:
-            result = validate_time_stamp_result["data"]
-            logger.info("Login token api return result is: %s" % result)
-            return ApiResponse(data=result)
-
-        validate_register_token_result = register.validate_request_data(register_token)
-        if not validate_register_token_result["success"]:
-            result = validate_register_token_result["data"]
-            logger.info("Login token api return result is: %s" % result)
-            return ApiResponse(data=result)
-
-        validate_sign_result = register.validate_sign(sign, phone_num, fcode, time_stamp, "")
-
-        if not validate_sign_result["success"]:
-            result = validate_sign_result["data"]
-            logger.info("Register query api return result is: %s" % result)
-            return ApiResponse(data=validate_sign_result["data"])
 
         phone_num = register.decrypt_data(phone_num)
+        uid = register.decrypt_data(uid)
 
         result = register.get_user_login_token(phone_num, fcode, register_token, uid)
         logger.info("Login token api return result is: %s" % result)
@@ -206,35 +168,16 @@ class AutoLogin(CoreViewBase):
         else:
             bid_url = "https://www.fanlitou.com"
 
-        validate_phone_num_result = register.validate_request_data(phone_num)
-        if not validate_phone_num_result["success"]:
-            result = validate_phone_num_result["data"]
+        is_success, result = register.validate_request_datas(phone_num, uid, time_stamp, register_token)
+
+        if not is_success:
             logger.info("Login token api return result is: %s" % result)
             return HttpResponseRedirect(bid_url)
 
-        validate_uid_result = register.validate_request_data(uid)
-        if not validate_uid_result["success"]:
-            result = validate_uid_result["data"]
+        is_success, result = register.validate_sign(sign, phone_num, fcode, time_stamp, "")
+
+        if not is_success:
             logger.info("Login token api return result is: %s" % result)
-            return HttpResponseRedirect(bid_url)
-
-        validate_time_stamp_result = register.validate_request_data(time_stamp)
-        if not validate_time_stamp_result["success"]:
-            result = validate_time_stamp_result["data"]
-            logger.info("Login token api return result is: %s" % result)
-            return HttpResponseRedirect(bid_url)
-
-        validate_register_token_result = register.validate_request_data(register_token)
-        if not validate_register_token_result["success"]:
-            result = validate_register_token_result["data"]
-            logger.info("Login token api return result is: %s" % result)
-            return HttpResponseRedirect(bid_url)
-
-        validate_sign_result = register.validate_sign(sign, phone_num, fcode, time_stamp, "")
-
-        if not validate_sign_result["success"]:
-            result = validate_sign_result["data"]
-            logger.info("Register query api return result is: %s" % result)
             return HttpResponseRedirect(bid_url)
 
         phone_num = register.decrypt_data(phone_num)
@@ -269,40 +212,28 @@ class UserBind(CoreViewBase):
         sign = request.GET.get('sign', "")
 
         if source == "mobile":
-            bid_url = "https://m.fanlitou.com/login/"
+            bind_login_url = "https://m.fanlitou.com/login/"
         else:
-            bid_url = "https://www.fanlitou.com/login/"
+            bind_login_url = "https://www.fanlitou.com/login/"
 
-        validate_phone_num_result = register.validate_request_data(phone_num)
-        if not validate_phone_num_result["success"]:
-            result = validate_phone_num_result["data"]
+        is_success, result = register.validate_request_datas(phone_num, uid, time_stamp)
+
+        if not is_success:
             logger.info("User bind api return result is: %s" % result)
-            return HttpResponseRedirect(bid_url)
+            return HttpResponseRedirect(bind_login_url)
 
-        validate_uid_result = register.validate_request_data(uid)
-        if not validate_uid_result["success"]:
-            result = validate_uid_result["data"]
+        is_success, result = register.validate_sign(sign, phone_num, fcode, time_stamp, "")
+
+        if not is_success:
             logger.info("User bind api return result is: %s" % result)
-            return HttpResponseRedirect(bid_url)
-
-        validate_time_stamp_result = register.validate_request_data(time_stamp)
-        if not validate_time_stamp_result["success"]:
-            result = validate_time_stamp_result["data"]
-            logger.info("User bind api return result is: %s" % result)
-            return HttpResponseRedirect(bid_url)
-
-        validate_sign_result = register.validate_sign(sign, phone_num, fcode, time_stamp, "")
-
-        if not validate_sign_result["success"]:
-            result = validate_sign_result["data"]
-            logger.info("User bind api return result is: %s" % result)
-            return HttpResponseRedirect(bid_url)
+            return HttpResponseRedirect(bind_login_url)
 
         phone_num = register.decrypt_data(phone_num)
+        uid = register.decrypt_data(uid)
 
-        bid_url = "%s?user_name=%s&fcode=%s" % (bid_url, phone_num, fcode)
+        bind_login_url = "%s?uid=%s&user_name=%s&fcode=%s&bid_url=%s" % (bind_login_url, uid, phone_num, fcode, bid_url)
 
-        return HttpResponseRedirect(bid_url)
+        return HttpResponseRedirect(bind_login_url)
 
 class GetBidList(APIView, ApiBase):
     """

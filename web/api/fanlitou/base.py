@@ -73,19 +73,14 @@ class AutoRegisterBase(object):
     def validate_sign(self, sign, phone_num, fcode, time_stamp, serial_num):
         flt_sign = self.sign(self.decrypt_data(phone_num), fcode, self.decrypt_data(time_stamp))
         if flt_sign == sign:
-            return {
-                "success": True
-            }
-        return {
-            "success": False,
-            "data": {
-                "status": self.status_mapping["NOT_PASS_VALIDATION"],
-                "phone_num": phone_num,
-                "user_name": "",
-                "serial_num": serial_num,
-                "register_token": "",
-                "err_msg": "未通过安全校验",
-            }
+            return True, None
+        return False, {
+            "status": self.status_mapping["NOT_PASS_VALIDATION"],
+            "phone_num": phone_num,
+            "user_name": "",
+            "serial_num": serial_num,
+            "register_token": "",
+            "err_msg": "未通过安全校验",
         }
 
     def validate_sign_for_bid_list(self, sign, fcode, time_stamp):
@@ -144,6 +139,16 @@ class AutoRegisterBase(object):
                 "success": True
             }
 
+    def validate_request_datas(self, *args):
+        for arg in args:
+            if not self.decrypt_data(arg):
+                return False, {
+                    "status": self.status_mapping["OTHER_FAIL_STATUS"],
+                    "err_msg": "数据解密错误",
+                }
+            else:
+                return True, None
+
     def encrypt_data(self, data):
         encrypt_result = self.cryption.encrypt(data)
         return encrypt_result
@@ -158,7 +163,7 @@ class AutoRegisterBase(object):
 
     def gen_token(self):
         random_20_num_and_str = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(20))
-        return self.encrypt_data(random_20_num_and_str)
+        return random_20_num_and_str
 
     def auto_register(self, fcode, phone_num, uid, serial_num):
         """
@@ -186,7 +191,6 @@ class AutoRegisterBase(object):
 
             # 异步发送短信告知用户密码
             # self.send_register_sms(phone_num, password)
-
             return {
                 "status": self.status_mapping["REGISTER_SUCCESS"],
                 "phone_num": self.encrypt_data(phone_num),
@@ -280,19 +284,19 @@ class AutoRegisterBase(object):
         try:
             # if "新用户，未注册":
             #     return {
-            #         "status": self.status_mapping["OTHER_FAIL_STATUS"],
+            #         "status": self.query_status["NOT_REGISTER"],
             #         "login_token": "",
             #         "err_msg": "新用户，未注册",
             #     }
             # if "老用户，已注册，其他渠道用户":
             #     return {
-            #         "status": self.status_mapping["OTHER_FAIL_STATUS"],
+            #         "status": self.query_status["NOT_FANLITOU_USER"],
             #         "login_token": "",
             #         "err_msg": "老用户，已注册，其他渠道用户",
             #     }
             # if "老用户，已注册，其他渠道用户":
             #     return {
-            #         "status": self.status_mapping["OTHER_FAIL_STATUS"],
+            #         "status": self.query_status["NOT_FANLITOU_USER"],
             #         "login_token": "",
             #         "err_msg": "老用户，已注册，其他渠道用户",
             #     }
@@ -318,14 +322,15 @@ class AutoRegisterBase(object):
             return {
                 "status": self.status_mapping["OTHER_FAIL_STATUS"],
                 "login_token": "",
-                "err_msg": "获得login token成功，系统错误",
+                "err_msg": "获得login token失败，系统错误",
             }
 
     def do_auto_login(self, request, phone_num, fcode, register_token, login_token, time_stamp, bid_url, source):
         """
-        获取用户自动登录token
+        用户自动登录
         """
         try:
+            phone_num = self.cryption.decrypt(phone_num)
             # user = self.get_user(phone_num)
             user = "query user"
 
@@ -376,8 +381,6 @@ class AutoRegisterBase(object):
 
         headers = {
             'content-type': "application/json",
-            'cache-control': "no-cache",
-            'postman-token': "d64872d9-699f-3afe-2b1e-193db7f5b050"
             }
 
         response = requests.request("POST", self.notify_url, data=json.dumps(data), headers=headers)

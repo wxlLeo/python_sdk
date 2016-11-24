@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
+# from __future__ import unicode_literals
 from Crypto.Cipher import AES
 from binascii import b2a_hex, a2b_hex
 import logging
+import traceback
 
 logger = logging.getLogger("django")
 
@@ -30,6 +31,8 @@ class Cryption(object):
             return b2a_hex(self.ciphertext)
         except:
             logger.error("Encrypt error for data: %s" % text)
+            print "***", type(text)
+            logger.error(traceback.format_exc())
             return False
 
     # 解密后，去掉补足的空格用strip() 去掉
@@ -44,9 +47,11 @@ class Cryption(object):
 
 if __name__ == '__main__':
     pc = Cryption('1234567890123456')      # 初始化密钥，长度必须为16位
-    phone_num = "13012345678"
+    phone_num = "测试"
     print "phone_num is ", phone_num
     phone_num_after_encrypt = pc.encrypt(phone_num)
     print "phone_num_after_encrypt is ", phone_num_after_encrypt
     phone_num_after_decrypt = pc.decrypt(phone_num_after_encrypt)
     print "phone_num_after_decrypt is ", phone_num_after_decrypt
+    print pc.decrypt("69a658b08a6035fe80ea53867a57d1a3")
+    print pc.encrypt("pc")

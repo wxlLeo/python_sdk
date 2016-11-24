@@ -34,5 +34,6 @@ urlpatterns += [
     url(r'^api/flt/get_login_token/$', fanlitou_api.LoginToken.as_view()),
     url(r'^api/flt/auto_login/$', fanlitou_api.AutoLogin.as_view(), name='fanlitou_auto_login'),
     url(r'^api/flt/user_bind/$', fanlitou_api.UserBind.as_view(), name='fanlitou_user_bind'),
+    url(r'^api/flt/get_bid_list/$', fanlitou_api.GetBidList.as_view()),
     url(r'^api/flt/get_invest_records/$', fanlitou_api.GetInvestRecord.as_view()),
 ]
